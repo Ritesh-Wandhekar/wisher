@@ -3,6 +3,7 @@ import { getTimeOfDayGreeting, nextOccurrenceDate, daysUntil } from "@/lib/utils
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { UpcomingEvents } from "@/components/dashboard/UpcomingEvents";
 import { TodayBanner } from "@/components/dashboard/TodayBanner";
+import { CalendarExportButton } from "@/components/dashboard/CalendarExportButton";
 import type { Event } from "@/types";
 
 export default async function DashboardHomePage() {
@@ -56,14 +57,18 @@ export default async function DashboardHomePage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <div className="text-2xl sm:text-3xl font-semibold tracking-tight">
-          {getTimeOfDayGreeting()}, {name} 👋
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <div className="text-2xl sm:text-3xl font-semibold tracking-tight">
+            {getTimeOfDayGreeting()}, {name} 👋
+          </div>
+          <div className="text-sm text-muted-foreground mt-1">
+            Here&apos;s what&apos;s coming up soon.
+          </div>
         </div>
-        <div className="text-sm text-muted-foreground mt-1">
-          Here&apos;s what&apos;s coming up soon.
-        </div>
+        <CalendarExportButton hasEvents={allEvents.length > 0} />
       </div>
+
 
       {/* Today's birthday / anniversary banners */}
       {todayEvents.length > 0 && <TodayBanner events={todayEvents} />}

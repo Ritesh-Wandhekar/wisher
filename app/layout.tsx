@@ -14,9 +14,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Wisher",
-  description: "Never miss a moment. Always say the perfect thing.",
+  title: "Wisher — AI Birthday & Anniversary Wishes",
+  description: "Never miss a moment. Always say the perfect thing. AI-powered personalised wishes in any tone and language.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Wisher",
+  },
+  icons: {
+    icon: "/icon-192.png",
+    apple: "/icon-192.png",
+  },
 };
+
 
 export default function RootLayout({
   children,
