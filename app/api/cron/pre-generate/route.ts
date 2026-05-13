@@ -52,8 +52,15 @@ export async function GET(req: Request) {
     return d >= 0 && d <= 1; // today and tomorrow
   });
 
+  // Today only — for push notifications
+  const todayEvents = ((events ?? []) as EventRow[]).filter((e) => {
+    const occ = nextOccurrenceDate(e.date, e.is_recurring);
+    return daysUntil(occ, now) === 0;
+  });
+
   let generated = 0;
   let skipped = 0;
+  let pushed = 0;
 
   for (const e of upcoming) {
     const contactName = e.contacts?.name ?? "Friend";
@@ -122,10 +129,76 @@ Rules:
     }
   }
 
+  // Send push notifications for TODAY's events
+  const vapidPublic = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
+  const vapidSubject = process.env.VAPID_SUBJECT;
+
+  if (vapidPublic && vapidPrivate && vapidSubject && todayEvents.length > 0) {
+    const webpush = (await import("web-push")).default;
+    webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
+
+    // Group today's events by user
+    const byUser = new Map<string, EventRow[]>();
+    for (const e of todayEvents) {
+      const list = byUser.get(e.user_id) ?? [];
+      list.push(e);
+      byUser.set(e.user_id, list);
+    }
+
+    for (const [, userEvents] of byUser) {
+      const userId = userEvents[0].user_id;
+
+      // Get all push subscriptions for this user
+      const { data: subs } = await supabase
+        .from("push_subscriptions")
+        .select("endpoint, p256dh, auth")
+        .eq("user_id", userId);
+
+      if (!subs || subs.length === 0) continue;
+
+      // Build notification message
+      const names = userEvents.map((e) => e.contacts?.name ?? "Someone");
+      const title =
+        names.length === 1
+          ? `🎂 Today is ${names[0]}'s ${userEvents[0].title}!`
+          : `🎂 ${names.length} special occasions today!`;
+      const body =
+        names.length === 1
+          ? `Tap to generate a heartfelt wish for ${names[0]}.`
+          : `${names.slice(0, 2).join(", ")} and more. Tap to generate wishes.`;
+
+      const payload = JSON.stringify({
+        title,
+        body,
+        tag: `wisher-birthday-${userId}`,
+        url: "/generate",
+      });
+
+      for (const sub of subs) {
+        try {
+          await webpush.sendNotification(
+            { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+            payload
+          );
+          pushed++;
+        } catch (err) {
+          console.error(`[cron] Push failed for ${sub.endpoint}:`, err);
+          // Remove stale/expired subscriptions automatically
+          await supabase
+            .from("push_subscriptions")
+            .delete()
+            .eq("endpoint", sub.endpoint);
+        }
+      }
+    }
+  }
+
   return NextResponse.json({
     ok: true,
     generated,
     skipped,
     total: upcoming.length,
+    pushed,
   });
 }

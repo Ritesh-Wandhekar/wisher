@@ -4,6 +4,7 @@ import { StatsCards } from "@/components/dashboard/StatsCards";
 import { UpcomingEvents } from "@/components/dashboard/UpcomingEvents";
 import { TodayBanner } from "@/components/dashboard/TodayBanner";
 import { CalendarExportButton } from "@/components/dashboard/CalendarExportButton";
+import { NotificationBell } from "@/components/dashboard/NotificationBell";
 import type { Event } from "@/types";
 
 export default async function DashboardHomePage() {
@@ -66,7 +67,10 @@ export default async function DashboardHomePage() {
             Here&apos;s what&apos;s coming up soon.
           </div>
         </div>
-        <CalendarExportButton hasEvents={allEvents.length > 0} />
+        <div className="flex items-center gap-2">
+          <NotificationBell />
+          <CalendarExportButton hasEvents={allEvents.length > 0} />
+        </div>
       </div>
 
 
