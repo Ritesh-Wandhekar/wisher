@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, LogOut, Sparkles, Users } from "lucide-react";
+import { Home, LogOut, ScrollText, Sparkles, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ const nav = [
   { href: "/", label: "Dashboard", icon: Home },
   { href: "/contacts", label: "Contacts", icon: Users },
   { href: "/generate", label: "Generate Wish", icon: Sparkles },
+  { href: "/history", label: "Wish History", icon: ScrollText },
 ];
 
 export function Sidebar() {

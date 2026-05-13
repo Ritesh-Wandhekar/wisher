@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Sparkles, Users } from "lucide-react";
+import { Home, ScrollText, Sparkles, Users } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,7 @@ const nav = [
   { href: "/", label: "Dashboard", icon: Home },
   { href: "/contacts", label: "Contacts", icon: Users },
   { href: "/generate", label: "Generate Wish", icon: Sparkles },
+  { href: "/history", label: "Wish History", icon: ScrollText },
 ];
 
 export function MobileNav({
